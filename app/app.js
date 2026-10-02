@@ -327,32 +327,38 @@ function validateRows() {
 }
 
 async function buildCommitments() {
-  validateRows();
+  try {
+    const roster = validateRows();
 
-  const c = payrollWithSigner();
-  const runId = await c.nextRunId();          // the run this payroll will become
-  const roster = validateRows();
+    const deadlineValue = $('deadlineInput').value;
+    if (!deadlineValue) throw new Error('Pick a claim deadline before building.');
 
-  const built = buildRoster(roster, runId);
-  const deadline = BigInt(Math.floor(new Date($('deadlineInput').value + 'T00:00:00').getTime() / 1000));
+    const c = payrollWithSigner();
+    const runId = await c.nextRunId();          // the run this payroll will become
 
-  S.built = { ...built, runId, deadline };
+    const built = buildRoster(roster, runId);
+    const deadline = BigInt(Math.floor(new Date(deadlineValue + 'T00:00:00').getTime() / 1000));
 
-  $('empRoot').textContent = built.root;
-  $('empCount').textContent = String(built.entries.length);
-  $('empDeposit').textContent = built.totalHuman;
+    S.built = { ...built, runId, deadline };
 
-  $('commitBox').innerHTML = `<div class="commit-list">${
-    built.entries.map((e) => `
-      <div class="commit-line">
-        <span class="who">${short(e.recipient)}</span>
-        <span class="amt">${usdg(e.amount)} USDG</span>
-      </div>`).join('')
-  }</div>`;
+    $('empRoot').textContent = built.root;
+    $('empCount').textContent = String(built.entries.length);
+    $('empDeposit').textContent = built.totalHuman;
 
-  $('fundBox').classList.remove('hidden');
-  $('buildBtn').textContent = 'Rebuild commitments';
-  toast(`Built ${built.entries.length} commitments · root ${built.root.slice(0, 12)}…`);
+    $('commitBox').innerHTML = `<div class="commit-list">${
+      built.entries.map((e) => `
+        <div class="commit-line">
+          <span class="who">${short(e.recipient)}</span>
+          <span class="amt">${usdg(e.amount)} USDG</span>
+        </div>`).join('')
+    }</div>`;
+
+    $('fundBox').classList.remove('hidden');
+    $('buildBtn').textContent = 'Rebuild commitments';
+    toast(`Built ${built.entries.length} commitments · root ${built.root.slice(0, 12)}…`);
+  } catch (err) {
+    toast(err.shortMessage || err.message || 'Could not build the commitments', true);
+  }
 }
 
 function downloadPackages() {
