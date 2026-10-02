@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Envelope">
+  <title>Envelope</title>
+  <rect width="128" height="128" fill="#ffffff"/>
+
+  <!-- envelope body -->
+  <rect x="16" y="32" width="96" height="66" rx="8"
+        fill="none" stroke="#1F4FD8" stroke-width="8"/>
+
+  <!-- flap: the sealed lid, its vertex kept clear of the window -->
+  <path d="M21 38 L64 58 L107 38"
+        fill="none" stroke="#1F4FD8" stroke-width="8"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- window cut into the face, centred on the body -->
+  <rect x="40" y="68" width="48" height="20" rx="5"
+        fill="#ffffff" stroke="#1F4FD8" stroke-width="5"/>
+
+  <!-- totals, visible through the window; baseline aligned -->
+  <rect x="48" y="79" width="8" height="6"  fill="#1F4FD8"/>
+  <rect x="60" y="76" width="8" height="9"  fill="#1F4FD8"/>
+  <rect x="72" y="73" width="8" height="12" fill="#1F4FD8"/>
+</svg>
