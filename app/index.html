@@ -27,7 +27,6 @@
     </svg>
     <div>
       <h1>Envelope</h1>
-      <p class="tagline">Verifiable payroll totals, private roster</p>
     </div>
   </div>
 
@@ -48,12 +47,11 @@
 <!-- ══════════════════════════ PUBLIC PROOF ══════════════════════════ -->
 <section id="view-public" class="view is-active">
   <div class="lede">
-    <h2>What anyone can see</h2>
+    <h2>Verifiable payroll totals, private roster</h2>
     <p>
-      Every run below publishes <strong>how much the employer set aside</strong> and
-      <strong>how much has actually been paid out</strong>. Individual salaries are committed,
-      not published — they exist only as salted hashes on-chain, so the roster cannot be
-      enumerated by an outside observer.
+      Anyone can check how much an employer set aside and how much has actually been paid out.
+      Individual salaries are committed as salted hashes rather than published, so the roster
+      cannot be read off the chain by an outsider.
     </p>
     <p class="fine">
       No wallet needed to read this page.
@@ -74,38 +72,28 @@
   </div>
 
   <div id="publicCard" class="hidden">
-    <div class="card card-totals">
-      <div class="totals-head">
-        <div>
-          <span class="kicker">Payroll run</span>
-          <div class="run-id">#<span id="pRunId">—</span></div>
-        </div>
+    <div class="hero">
+      <div class="hero-head">
+        <span class="run-ref">Payroll run <span class="run-num" id="pRunId">—</span></span>
         <span id="pReclaimed" class="pill hidden">closed</span>
       </div>
 
-      <div class="totals">
-        <div class="total">
-          <span class="kicker">Set aside</span>
-          <div class="amount"><span id="pDeposited">—</span><span class="unit">USDG</span></div>
-        </div>
-        <div class="total total-accent">
-          <span class="kicker">Paid out</span>
-          <div class="amount"><span id="pClaimed">—</span><span class="unit">USDG</span></div>
-        </div>
-        <div class="total">
-          <span class="kicker">Still held</span>
-          <div class="amount"><span id="pRemaining">—</span><span class="unit">USDG</span></div>
-        </div>
+      <div class="hero-figure">
+        <span class="hero-amount" id="pClaimed">—</span>
+        <span class="hero-unit">USDG</span>
       </div>
+      <p class="hero-context">
+        paid out of <strong id="pDeposited">—</strong> set aside
+      </p>
 
-      <div class="progress" role="img" aria-label="share of the payroll claimed">
+      <div class="progress" role="progressbar" aria-label="share of the payroll claimed">
         <div id="pBar" class="progress-bar" style="width:0%"></div>
       </div>
-      <p class="fine" id="pProgressNote">—</p>
+      <p class="hero-note" id="pProgressNote">—</p>
     </div>
 
     <dl class="facts">
-      <div><dt>Employer</dt><dd class="mono" id="pEmployer">—</dd></div>
+      <div><dt>Employer</dt><dd class="mono wrap" id="pEmployer">—</dd></div>
       <div><dt>Merkle root</dt><dd class="mono wrap" id="pRoot">—</dd></div>
       <div><dt>Claim deadline</dt><dd id="pDeadline">—</dd></div>
     </dl>
@@ -151,7 +139,7 @@
       <div id="commitBox" class="commit-empty">
         Build the tree to generate a root. Nothing is sent anywhere yet.
       </div>
-      <button id="buildBtn" class="btn btn-primary btn-block">Build commitments</button>
+      <button id="buildBtn" class="btn btn-block">Build commitments</button>
     </div>
 
     <div id="fundBox" class="hidden">
@@ -176,8 +164,8 @@
       </div>
 
       <div class="two-step">
-        <button id="approveBtn" class="btn btn-primary">1 · Approve USDG</button>
-        <button id="createBtn" class="btn btn-primary" disabled>2 · Create run</button>
+        <button id="approveBtn" class="btn btn-primary">1. Approve USDG</button>
+        <button id="createBtn" class="btn" disabled>2. Create run</button>
       </div>
       <p class="fine" id="fundStatus">
         Step 1 lets the contract move your USDG. Step 2 locks it into the run and publishes the root.
@@ -214,7 +202,7 @@
 
   <div id="claimResult" class="hidden">
     <div class="card card-entitlement">
-      <span class="kicker">You are entitled to</span>
+      <span class="entitlement-label">You are entitled to</span>
       <div class="entitlement"><span id="cAmount">—</span><span class="unit">USDG</span></div>
       <p class="fine" id="cMeta">—</p>
 

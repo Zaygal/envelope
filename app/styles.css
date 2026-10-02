@@ -15,10 +15,18 @@
 
   --good:      #067647;
   --good-soft: #ecfdf3;
+  --good-line: #c7ebd8;
   --warn:      #b54708;
   --warn-soft: #fffaeb;
+  --warn-line: #fde3bd;
+  --info-line: #d3e0fb;
+  --danger:    #912018;
 
-  --radius: 14px;
+  /* Two radii, deliberately: surfaces that hold data are near-square, controls are rounded.
+     A single radius everywhere is what makes a page read as assembled from a kit. */
+  --radius-surface: 3px;
+  --radius-control: 8px;
+
   --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
 }
@@ -58,11 +66,10 @@ body {
   width: 38px; height: 38px; flex: none;
   stroke: var(--accent); stroke-width: 1.6;
   fill: none; stroke-linecap: round; stroke-linejoin: round;
-  background: var(--accent-soft); border-radius: 10px; padding: 6px;
+  background: var(--accent-soft); border-radius: var(--radius-control); padding: 6px;
 }
 
 .brand h1 { margin: 0; font-size: 17px; letter-spacing: -0.01em; }
-.tagline { margin: 0; font-size: 12px; color: var(--ink-faint); }
 
 .wallet { display: flex; align-items: center; gap: 8px; }
 
@@ -87,7 +94,7 @@ body {
   appearance: none; border: 0; background: none;
   font: inherit; font-weight: 550; font-size: 14px;
   color: var(--ink-soft);
-  padding: 9px 14px; border-radius: 9px 9px 0 0;
+  padding: 9px 14px; border-radius: var(--radius-control) var(--radius-control) 0 0;
   cursor: pointer; white-space: nowrap;
   border-bottom: 2px solid transparent;
 }
@@ -114,44 +121,54 @@ main { max-width: 940px; margin: 0 auto; padding: 20px; }
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-surface);
   padding: 18px;
   margin-bottom: 16px;
 }
 
-.card-totals { padding: 20px; }
+/* ── hero: the one loud element on the public view ──────────
+   Deliberately NOT a card. It sits open on the page, separated by a rule,
+   so the money reads as the subject rather than as one more panel. */
 
-.totals-head {
+.hero {
+  padding: 4px 0 22px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hero-head {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 12px; margin-bottom: 14px;
 }
 
-.kicker {
-  display: block;
-  font-size: 11px; font-weight: 650; letter-spacing: 0.06em;
-  text-transform: uppercase; color: var(--ink-faint);
-  margin-bottom: 5px;
-}
+.run-ref { font-size: 13px; color: var(--ink-soft); }
+.run-num { font-family: var(--mono); font-weight: 620; color: var(--ink); }
 
-.run-id { font-size: 22px; font-weight: 650; font-family: var(--mono); }
-
-.totals {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 18px;
+.hero-figure {
+  display: flex; align-items: baseline; gap: 8px;
+  line-height: 1;
 }
-
-.total .amount {
-  font-size: 27px; font-weight: 660; letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+.hero-amount {
+  font-size: 58px; font-weight: 660; letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums; color: var(--accent);
 }
-.total-accent .amount { color: var(--accent); }
-.unit { font-size: 13px; font-weight: 600; color: var(--ink-faint); margin-left: 5px; }
+.hero-unit { font-size: 15px; font-weight: 600; color: var(--ink-faint); }
+
+.hero-context {
+  margin: 10px 0 0;
+  font-size: 16px; color: var(--ink-soft);
+}
+.hero-context strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.hero-note {
+  margin: 9px 0 0; font-size: 13px; color: var(--ink-soft);
+}
+.hero-note strong { color: var(--ink); font-variant-numeric: tabular-nums; }
 
 .progress {
   height: 8px; border-radius: 999px;
   background: var(--line-soft); overflow: hidden;
-  margin: 18px 0 8px;
+  margin: 20px 0 0;
 }
 .progress-bar {
   height: 100%; border-radius: 999px;
@@ -160,42 +177,48 @@ main { max-width: 940px; margin: 0 auto; padding: 20px; }
 }
 
 .pill {
-  font-size: 11px; font-weight: 650; padding: 3px 9px;
+  font-size: 11.5px; font-weight: 620; padding: 3px 9px;
   border-radius: 999px; background: var(--line-soft); color: var(--ink-soft);
-  text-transform: uppercase; letter-spacing: 0.04em;
 }
 
 /* ── facts list ──────────────────────────────────────────── */
 
+/* Facts read as a record rather than a panel: hairlines only, no box.
+   Deliberately a different surface treatment from .card. */
 .facts {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 6px 18px;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
+  border-top: 1px solid var(--line);
 }
 .facts > div {
-  display: flex; gap: 16px; justify-content: space-between;
-  padding: 11px 0; border-bottom: 1px solid var(--line-soft);
+  display: flex; gap: 16px; justify-content: space-between; align-items: baseline;
+  padding: 10px 0; border-bottom: 1px solid var(--line-soft);
 }
-.facts > div:last-child { border-bottom: 0; }
 .facts dt { color: var(--ink-faint); font-size: 13px; flex: none; }
-.facts dd { margin: 0; text-align: right; font-weight: 550; }
+.facts dd {
+  margin: 0; text-align: right; font-weight: 550;
+  min-width: 0; overflow-wrap: anywhere;
+}
 
 /* ── notices ─────────────────────────────────────────────── */
 
+/* Notices are marked by a rule on the leading edge and a soft fill — not by a full box,
+   so they don't read as one more card. */
 .notice {
-  border-radius: 10px; padding: 12px 14px; font-size: 13.5px;
-  border: 1px solid transparent; margin: 0 0 16px;
+  border-radius: 0;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  border-left: 3px solid transparent;
+  margin: 0 0 16px;
 }
-.notice-info { background: var(--accent-soft); color: var(--accent-ink); border-color: #d3e0fb; }
-.notice-warn { background: var(--warn-soft); color: var(--warn); border-color: #fde3bd; }
-.notice-good { background: var(--good-soft); color: var(--good); border-color: #c7ebd8; }
+.notice-info { background: var(--accent-soft); color: var(--accent-ink); border-left-color: var(--accent); }
+.notice-warn { background: var(--warn-soft); color: var(--warn); border-left-color: var(--warn-line); }
+.notice-good { background: var(--good-soft); color: var(--good); border-left-color: var(--good-line); }
 .notice strong { font-weight: 650; }
 
 .empty {
-  background: var(--surface); border: 1px dashed var(--line);
-  border-radius: var(--radius); padding: 30px 20px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-surface);
+  padding: 30px 20px;
   text-align: center; color: var(--ink-faint); font-size: 13.5px;
 }
 
@@ -205,7 +228,7 @@ main { max-width: 940px; margin: 0 auto; padding: 20px; }
   font: inherit; font-size: 14px;
   padding: 9px 11px;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius-control);
   background: var(--surface); color: var(--ink);
   width: 100%;
 }
@@ -220,7 +243,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 .btn {
   appearance: none; font: inherit; font-size: 14px; font-weight: 570;
-  padding: 9px 15px; border-radius: 9px;
+  padding: 9px 15px; border-radius: var(--radius-control);
   border: 1px solid var(--line);
   background: var(--surface); color: var(--ink);
   cursor: pointer; white-space: nowrap;
@@ -263,7 +286,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .row .del {
   border: 0; background: none; cursor: pointer;
   color: var(--ink-faint); font-size: 18px; line-height: 1;
-  padding: 6px; border-radius: 7px;
+  padding: 6px; border-radius: var(--radius-control);
 }
 .row .del:hover { color: var(--warn); background: var(--warn-soft); }
 
@@ -276,7 +299,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .sumline strong { font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
 
 .commit-empty {
-  border: 1px dashed var(--line); border-radius: 10px;
+  border: 1px dashed var(--line); border-radius: var(--radius-surface);
   padding: 22px 16px; text-align: center;
   color: var(--ink-faint); font-size: 13px;
 }
@@ -292,7 +315,11 @@ textarea.input { resize: vertical; line-height: 1.5; }
 
 /* ── entitlement ─────────────────────────────────────────── */
 
-.card-entitlement { border-color: #d3e0fb; background: var(--accent-soft); }
+.card-entitlement { border-color: var(--info-line); background: var(--accent-soft); }
+.entitlement-label {
+  display: block; font-size: 13.5px; font-weight: 600;
+  color: var(--accent-ink); margin-bottom: 6px;
+}
 .entitlement {
   font-size: 40px; font-weight: 680; letter-spacing: -0.025em;
   color: var(--accent-ink); line-height: 1.1;
@@ -307,7 +334,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .run-item {
   display: flex; justify-content: space-between; align-items: center; gap: 14px;
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: 11px; padding: 13px 15px;
+  border-radius: var(--radius-surface); padding: 13px 15px;
 }
 .run-item .id { font-family: var(--mono); font-weight: 650; }
 .run-item .nums { font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
@@ -337,7 +364,7 @@ textarea.input { resize: vertical; line-height: 1.5; }
   transform: translate(-50%, 14px);
   opacity: 0; visibility: hidden; pointer-events: none;
   background: var(--ink); color: #fff;
-  padding: 11px 17px; border-radius: 10px;
+  padding: 11px 17px; border-radius: var(--radius-control);
   font-size: 13.5px; font-weight: 520;
   max-width: min(92vw, 520px);
   box-shadow: 0 8px 26px rgba(16, 24, 40, 0.22);
@@ -345,16 +372,21 @@ textarea.input { resize: vertical; line-height: 1.5; }
   z-index: 60;
 }
 .toast.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
-.toast.bad { background: #912018; }
+.toast.bad { background: var(--danger); }
 /* an empty toast must render nothing at all */
 .toast:empty { display: none; }
 
 @media (max-width: 560px) {
   .row { grid-template-columns: 1fr 104px 30px; }
   .entitlement { font-size: 33px; }
-  .total .amount { font-size: 23px; }
+  .hero-amount { font-size: 46px; }
   .topbar { padding: 13px 16px; }
   main { padding: 16px; }
+
+  /* Stack label over value so a 42-character address can never squeeze or overflow. */
+  .facts > div { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .facts dd { text-align: left; }
+  .two-step { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

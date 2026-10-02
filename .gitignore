@@ -19,3 +19,8 @@ docs/
 .env.*
 !.env.example
 node_modules/
+
+# locally installed agent skills (not part of the deliverable)
+.agents/
+.claude/
+skills-lock.json

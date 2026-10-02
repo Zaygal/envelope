@@ -159,7 +159,7 @@ async function connect() {
     S.signer = await fresh.getSigner();
     S.account = accounts[0];
 
-    $('netBadge').textContent = `Arbitrum Sepolia · ${short(S.account)}`;
+    $('netBadge').textContent = `Arbitrum Sepolia (${short(S.account)})`;
     $('netBadge').className = 'badge badge-ok';
     $('connectBtn').textContent = 'Connected';
     $('connectBtn').disabled = true;
@@ -214,15 +214,20 @@ async function loadRun(runId) {
 
     const deposited = r.totalDeposited;
     const claimed = r.totalClaimed;
+    const remaining = deposited - claimed;
     const pct = deposited > 0n ? Number((claimed * 10000n) / deposited) / 100 : 0;
+    const pctLabel = `${pct.toFixed(pct === 0 || pct === 100 ? 0 : 1)}%`;
 
     $('pRunId').textContent = runId;
-    $('pDeposited').textContent = usdg(deposited);
     $('pClaimed').textContent = usdg(claimed);
-    $('pRemaining').textContent = usdg(deposited - claimed);
+    $('pDeposited').textContent = `${usdg(deposited)} USDG`;
     $('pBar').style.width = `${Math.min(100, pct)}%`;
+
+    // State the remainder and the share outright — the reader should not do the subtraction.
     $('pProgressNote').textContent =
-      `${pct.toFixed(pct === 0 ? 0 : 1)}% of the payroll has been claimed.`;
+      remaining > 0n
+        ? `${usdg(remaining)} USDG still held. ${pctLabel} of this run has been claimed.`
+        : `Fully claimed. Nothing is still held.`;
     $('pEmployer').textContent = r.employer;
     $('pRoot').textContent = r.root;
     $('pDeadline').textContent = dateStr(r.deadline);
@@ -250,7 +255,7 @@ async function refreshRuns() {
         <div class="run-item">
           <div>
             <div class="id">Run #${i}</div>
-            <div class="nums">${usdg(r.totalDeposited)} set aside · ${usdg(r.totalClaimed)} paid out</div>
+            <div class="nums">${usdg(r.totalClaimed)} paid out of ${usdg(r.totalDeposited)} set aside</div>
           </div>
           <button class="btn btn-sm" data-run="${i}">View</button>
         </div>`);
@@ -398,8 +403,12 @@ async function approve() {
     const tx = await token.approve(addr, S.built.total);
     $('fundStatus').textContent = `Approval sent: ${tx.hash}`;
     await tx.wait();
+    // Exactly one dominant action at a time: approving hands the weight to the next step.
     $('createBtn').disabled = false;
-    $('approveBtn').textContent = '1 · Approved';
+    $('createBtn').classList.add('btn-primary');
+    $('approveBtn').classList.remove('btn-primary');
+    $('approveBtn').disabled = true;
+    $('approveBtn').textContent = '1. Approved';
     $('fundStatus').textContent = 'Approved. Now create the run to lock the funds.';
     toast('USDG approved');
   } catch (err) {
@@ -446,7 +455,8 @@ async function checkPackage() {
 
   const p = pendingPackage;
   $('cAmount').textContent = p.amountHuman;
-  $('cMeta').textContent = `Run #${p.runId} · commitment index ${p.index} · ${short(p.recipient)} · ${short(p.contract)}`;
+  $('cMeta').textContent =
+    `Commitment ${p.index} in run #${p.runId}, made out to ${short(p.recipient)}. Contract ${short(p.contract)}.`;
 
   // Local check first: does this proof actually fold to the on-chain root?
   let okLocal = false;

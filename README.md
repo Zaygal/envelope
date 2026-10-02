@@ -74,6 +74,11 @@ These are stated plainly because a judge should be able to check them.
    closes permanently.
 6. **Losing the salts delays employees.** They can never build a proof, so funds can only return to the
    employer via `reclaim`. Employees risk delay, never loss.
+7. **USDG is not neutral infrastructure.** The settlement token is an upgradeable proxy whose issuer
+   retains `paused()` and `isFrozen(address)` control (verified against the live contract — see
+   `test/Fork.t.sol`). A frozen recipient cannot claim, a frozen employer cannot `reclaim`, and a paused
+   token halts every transfer. This contract cannot defend against the issuer of the money it moves, and
+   it does not pretend to.
 
 ## Layout
 
@@ -89,10 +94,14 @@ app/                      static frontend (no backend)
 
 ```bash
 forge build
-forge test -vv
+forge test -vv                                   # unit, fuzz, parity (no network)
+forge test --match-contract ForkUSDGTest \
+  --fork-url https://sepolia-rollup.arbitrum.io/rpc   # full flow vs the real USDG
+
+node --test test/js/merkle.test.js               # JS tree builder
 ```
 
-Requires [Foundry](https://book.getfoundry.sh/). Dependencies (`forge-std`,
+Requires [Foundry](https://book.getfoundry.sh/) and Node ≥ 20. Dependencies (`forge-std`,
 `openzeppelin-contracts`) are vendored as git submodules.
 
 ## Deployed
