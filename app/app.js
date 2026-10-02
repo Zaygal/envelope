@@ -82,6 +82,20 @@ function toast(msg, bad = false) {
   toast._t = setTimeout(() => el.classList.remove('show'), bad ? 6500 : 4200);
 }
 
+// ethers collapses any provider error it doesn't recognise into "could not coalesce error",
+// which tells the user nothing. The actual reason lives deeper in the error object
+// (err.info.error, .data, or .error), so unwind it and show the real message.
+function errText(err) {
+  const parts = [];
+  let e = err;
+  for (let i = 0; i < 5 && e; i++) {
+    const m = typeof e === 'string' ? e : (e.shortMessage || e.message || e.reason);
+    if (m) parts.push(m);
+    e = (e.info && e.info.error) || e.data || e.error || null;
+  }
+  return [...new Set(parts)].join(' — ') || 'Unknown error';
+}
+
 const short = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—');
 const usdg = (units) => Number(formatUnits(units, USDG_DECIMALS)).toLocaleString(undefined, {
   minimumFractionDigits: 0,
@@ -170,7 +184,7 @@ async function connect() {
     await refreshRuns();
     toast('Connected on Arbitrum Sepolia');
   } catch (err) {
-    toast(err.shortMessage || err.message || 'Could not connect', true);
+    toast(errText(err), true);
   }
 }
 
@@ -236,7 +250,7 @@ async function loadRun(runId) {
     $('publicEmpty').classList.add('hidden');
     $('publicCard').classList.remove('hidden');
   } catch (err) {
-    toast(err.shortMessage || err.message || 'Could not read that run', true);
+    toast(errText(err), true);
   }
 }
 
@@ -357,7 +371,7 @@ async function buildCommitments() {
     $('buildBtn').textContent = 'Rebuild commitments';
     toast(`Built ${built.entries.length} commitments · root ${built.root.slice(0, 12)}…`);
   } catch (err) {
-    toast(err.shortMessage || err.message || 'Could not build the commitments', true);
+    toast(errText(err), true);
   }
 }
 
@@ -420,7 +434,7 @@ async function approve() {
   } catch (err) {
     $('approveBtn').disabled = false;
     $('fundStatus').textContent = '';
-    toast(err.shortMessage || err.message || 'Approval failed', true);
+    toast(errText(err), true);
   }
 }
 
@@ -442,7 +456,7 @@ async function createRun() {
   } catch (err) {
     $('createBtn').disabled = false;
     $('fundStatus').textContent = '';
-    toast(err.shortMessage || err.message || 'Could not create the run', true);
+    toast(errText(err), true);
   }
 }
 
@@ -455,7 +469,7 @@ async function checkPackage() {
     pendingPackage = parseClaimPackage($('pkgInput').value.trim());
   } catch (err) {
     $('claimResult').classList.add('hidden');
-    toast(err.message, true);
+    toast(errText(err), true);
     return;
   }
 
@@ -475,7 +489,7 @@ async function checkPackage() {
       const leaf = hashLeaf(p.runId, p.index, p.recipient, p.amount, p.salt);
       okLocal = await c.verifyClaim(p.runId, p.index, p.recipient, p.amount, p.salt, p.proof);
     } catch (err) {
-      toast(err.shortMessage || err.message || 'Could not reach the contract', true);
+      toast(errText(err), true);
     }
   }
 
@@ -528,7 +542,7 @@ async function doClaim() {
   } catch (err) {
     $('claimBtn').disabled = false;
     $('claimStatus').textContent = '';
-    toast(err.shortMessage || err.message || 'Claim failed', true);
+    toast(errText(err), true);
   }
 }
 
