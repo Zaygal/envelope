@@ -1,0 +1,15 @@
+{
+  "name": "envelope",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Envelope — verifiable payroll totals, private roster. Client-side Merkle tooling.",
+  "scripts": {
+    "test": "node --test test/js/",
+    "vector": "node scripts/gen-parity-vector.mjs",
+    "parity": "npm run vector && forge test --match-contract Parity -vv"
+  },
+  "dependencies": {
+    "ethers": "^6.15.0"
+  }
+}
