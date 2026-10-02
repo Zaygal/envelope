@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deploy PayrollRun — Arbitrum Sepolia</title>
+<style>
+:root{--ink:#101828;--soft:#475467;--faint:#98a2b3;--line:#e4e7ec;--accent:#1f4fd8;
+--good:#067647;--good-bg:#ecfdf3;--warn:#b54708;--warn-bg:#fffaeb;--bad:#912018}
+*{box-sizing:border-box}
+body{margin:0;padding:22px 18px 60px;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:#fff;max-width:640px;margin-inline:auto}
+h1{font-size:19px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--soft);margin:0 0 20px;font-size:14px}
+.facts{border-top:1px solid var(--line);margin:0 0 20px}
+.facts>div{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #f0f2f5}
+.facts dt{color:var(--faint);font-size:13px;flex:none}
+.facts dd{margin:0;text-align:right;font-weight:550;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;overflow-wrap:anywhere;min-width:0}
+button{font:inherit;font-weight:570;font-size:15px;padding:13px 18px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;width:100%;margin-bottom:10px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.msg{border-left:3px solid;padding:11px 14px;font-size:13.5px;margin:0 0 14px;white-space:pre-wrap}
+.ok{background:var(--good-bg);color:var(--good);border-color:#c7ebd8}
+.warn{background:var(--warn-bg);color:var(--warn);border-color:#fde3bd}
+.bad{background:#fef3f2;color:var(--bad);border-color:#fecdca}
+.info{background:#eef4ff;color:#1f3d8f;border-color:#d3e0fb}
+.log{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--soft);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:14px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<h1>Deploy PayrollRun</h1>
+<p class="sub">Broadcasts the frozen artifact to <strong>Arbitrum Sepolia</strong>. No recompiling &mdash; this sends the exact audited bytecode.</p>
+
+<dl class="facts">
+  <div><dt>Target chain</dt><dd>421614 (Arbitrum Sepolia)</dd></div>
+  <div><dt>Value sent</dt><dd>0 ETH</dd></div>
+  <div><dt>Deploy data</dt><dd>3,955 bytes</dd></div>
+  <div><dt>Constructor arg</dt><dd>0xFFC95faa…b41892</dd></div>
+</dl>
+
+<div id="msg" class="msg info">Connect a wallet to begin. The network is verified again immediately before sending.</div>
+<button id="connect" class="primary">1 &nbsp;Connect wallet</button>
+<button id="deploy" disabled>2 &nbsp;Deploy PayrollRun</button>
+<pre id="log" class="log"></pre>
+
+<script>
+const CHAIN_ID = 421614;
+const CHAIN_HEX = '0x66eee';
+const CHAIN_PARAMS = {
+  chainId: CHAIN_HEX,
+  chainName: 'Arbitrum Sepolia',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: ['https://sepolia-rollup.arbitrum.io/rpc'],
+  blockExplorerUrls: ['https://sepolia.arbiscan.io']
+};
+const USDG = '0xFFC95faa3d63Cde504a05B567C600B78C0b41892';
+const DEPLOY_DATA = '0x60a060405260015f55348015610013575f80fd5b50604051610f53380380610f538339810160408190526100329161008e565b60017f9b779b17422d0df92223018b32b4d1fa46e071723d6817e2486d003becc55f00556001600160a01b03811661007d5760405163d92e233d60e01b815260040160405180910390fd5b6001600160a01b03166080526100bb565b5f6020828403121561009e575f80fd5b81516001600160a01b03811681146100b4575f80fd5b9392505050565b608051610e6b6100e85f395f8181610297015281816104390152818161068201526108770152610e6b5ff3fe608060405234801561000f575f80fd5b50600436106100cb575f3560e01c8063710df6c211610088578063ae66f57c11610063578063ae66f57c146101d2578063cbaa653414610277578063cd2d944f1461028a578063f5b91b7b14610292575f80fd5b8063710df6c21461019457806385ae341d146101a75780639196b700146101ca575f80fd5b80630361bf14146100cf5780632297bf59146100f55780632dabbeed1461011c5780632de9818714610131578063414f3b9c1461014457806367af980014610157575b5f80fd5b6100e26100dd366004610bb7565b6102d1565b6040519081526020015b60405180910390f35b6100e27fd5dcffc5a7fa528fe75d89553ce45c59d1a330678c37d687b2cc2783196d94be81565b61012f61012a366004610bb7565b6102f9565b005b6100e261013f366004610be9565b61047d565b6100e2610152366004610c2c565b6104f7565b610184610165366004610c6d565b600260209081525f928352604080842090915290825290205460ff1681565b60405190151581526020016100ec565b61012f6101a2366004610cd5565b6106c0565b6101b16201518081565b60405167ffffffffffffffff90911681526020016100ec565b6100e26108bd565b61022f6101e0366004610bb7565b600160208190525f91825260409091208054918101546002820154600383015460048401546005909401546001600160a01b0390951694929367ffffffffffffffff9092169290919060ff1686565b604080516001600160a01b039097168752602087019590955267ffffffffffffffff9093169385019390935260608401526080830191909152151560a082015260c0016100ec565b610184610285366004610d3a565b6108d1565b6100e25f5481565b6102b97f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016100ec565b5f818152600160205260408120600481015460038201546102f29190610dc3565b9392505050565b61030161099f565b5f81815260016020526040902080546001600160a01b0316610336576040516395a3b12760e01b815260040160405180910390fd5b80546001600160a01b03163314610360576040516302e5827160e11b815260040160405180910390fd5b600281015467ffffffffffffffff16421161038e5760405163032ed4e560e41b815260040160405180910390fd5b600581015460ff16156103b45760405163b3d98bef60e01b815260040160405180910390fd5b5f816004015482600301546103c99190610dc3565b60058301805460ff1916600117905582546040519192506001600160a01b03169084907fe79f76d3ef42e7845b4f718917861642d857a02a4e690c28e79e5af7f5f8f2d39061041b9085815260200190565b60405180910390a38015610462578154610462906001600160a01b037f000000000000000000000000000000000000000000000000000000000000000081169116836109ba565b505061047a60015f80516020610e1683398151915255565b50565b604080517fd5dcffc5a7fa528fe75d89553ce45c59d1a330678c37d687b2cc2783196d94be6020820152908101869052606081018590526001600160a01b038416608082015260a0810183905260c081018290525f9060e00160405160208183030381529060405280519060200120905095945050505050565b5f61050061099f565b8361051e5760405163258b5c5b60e11b815260040160405180910390fd5b815f0361053e5760405163d43e607560e01b815260040160405180910390fd5b61054b6201518042610dd6565b8367ffffffffffffffff161015610575576040516325a8637d60e21b815260040160405180910390fd5b5f8054908061058383610de9565b909155506040805160c08101825233808252602080830189815267ffffffffffffffff89811685870181815260608088018c81525f60808a0181815260a08b018281528d83526001808b52928d90209b518c546001600160a01b0319166001600160a01b03909116178c559751918b0191909155925160028a01805467ffffffffffffffff191691909616179094559251600388015551600487015591516005909501805460ff19169515159590951790945584518a81529182015292830186905292935083917f4ffeaa7e224002fcc124759a281685e3496212e209e5a58c5e81fdc1c791f944910160405180910390a36106aa6001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000163330856109f9565b6102f260015f80516020610e1683398151915255565b6106c861099f565b5f86815260016020526040902080546001600160a01b03166106fd576040516395a3b12760e01b815260040160405180910390fd5b600581015460ff16156107235760405163b3d98bef60e01b815260040160405180910390fd5b600281015467ffffffffffffffff164211156107525760405163387b2e5560e11b815260040160405180910390fd5b5f87815260026020908152604080832089845290915290205460ff161561078c57604051630c8d9eab60e31b815260040160405180910390fd5b6107d88383808060200260200160405190810160405280939291908181526020018383602002808284375f9201919091525050505060018301546107d38a8a338b8b61047d565b610a35565b6107f5576040516309bde33960e01b815260040160405180910390fd5b5f8781526002602090815260408083208984529091528120805460ff1916600117905560048201805487929061082c908490610dd6565b90915550506040518581523390879089907fb94bf7f9302edf52a596286915a69b4b0685574cffdedd0712e3c62f2550f0ba9060200160405180910390a461089e6001600160a01b037f00000000000000000000000000000000000000000000000000000000000000001633876109ba565b506108b560015f80516020610e1683398151915255565b505050505050565b5f60015f546108cc9190610dc3565b905090565b5f87815260016020526040812080546001600160a01b031615806108f95750600581015460ff165b806109115750600281015467ffffffffffffffff1642115b1561091f575f915050610994565b5f8981526002602090815260408083208b845290915290205460ff1615610949575f915050610994565b6109908484808060200260200160405190810160405280939291908181526020018383602002808284375f9201919091525050505060018301546107d38c8c8c8c8c61047d565b9150505b979650505050505050565b6109a7610a4a565b60025f80516020610e1683398151915255565b6109c78383836001610a7b565b6109f457604051635274afe760e01b81526001600160a01b03841660048201526024015b60405180910390fd5b505050565b610a07848484846001610add565b610a2f57604051635274afe760e01b81526001600160a01b03851660048201526024016109eb565b50505050565b5f82610a418584610b4a565b14949350505050565b5f80516020610e1683398151915254600203610a7957604051633ee5aeb560e01b815260040160405180910390fd5b565b60405163a9059cbb60e01b5f8181526001600160a01b038616600452602485905291602083604481808b5af1925060015f51148316610ad1578383151615610ac5573d5f823e3d81fd5b5f873b113d1516831692505b60405250949350505050565b6040516323b872dd60e01b5f8181526001600160a01b038781166004528616602452604485905291602083606481808c5af1925060015f51148316610b39578383151615610b2d573d5f823e3d81fd5b5f883b113d1516831692505b604052505f60605295945050505050565b5f81815b8451811015610b8457610b7a82868381518110610b6d57610b6d610e01565b6020026020010151610b8e565b9150600101610b4e565b5090505b92915050565b5f818310610ba8575f8281526020849052604090206102f2565b505f9182526020526040902090565b5f60208284031215610bc7575f80fd5b5035919050565b80356001600160a01b0381168114610be4575f80fd5b919050565b5f805f805f60a08688031215610bfd575f80fd5b8535945060208601359350610c1460408701610bce565b94979396509394606081013594506080013592915050565b5f805f60608486031215610c3e575f80fd5b83359250602084013567ffffffffffffffff81168114610c5c575f80fd5b929592945050506040919091013590565b5f8060408385031215610c7e575f80fd5b50508035926020909101359150565b5f8083601f840112610c9d575f80fd5b50813567ffffffffffffffff811115610cb4575f80fd5b6020830191508360208260051b8501011115610cce575f80fd5b9250929050565b5f805f805f8060a08789031215610cea575f80fd5b86359550602087013594506040870135935060608701359250608087013567ffffffffffffffff811115610d1c575f80fd5b610d2889828a01610c8d565b979a9699509497509295939492505050565b5f805f805f805f60c0888a031215610d50575f80fd5b8735965060208801359550610d6760408901610bce565b9450606088013593506080880135925060a088013567ffffffffffffffff811115610d90575f80fd5b610d9c8a828b01610c8d565b989b979a50959850939692959293505050565b634e487b7160e01b5f52601160045260245ffd5b81810381811115610b8857610b88610daf565b80820180821115610b8857610b88610daf565b5f60018201610dfa57610dfa610daf565b5060010190565b634e487b7160e01b5f52603260045260245ffdfe9b779b17422d0df92223018b32b4d1fa46e071723d6817e2486d003becc55f00a2646970667358221220a944fbd40d783b5bd2ac8c43a68aa8ebbbdd615a98637a3c10c54c9e3a4af97e64736f6c63430008180033000000000000000000000000ffc95faa3d63cde504a05b567c600b78c0b41892';
+
+const $ = (id) => document.getElementById(id);
+const log = (s) => { $('log').textContent += s + '\n'; };
+const say = (text, kind) => { const m = $('msg'); m.className = 'msg ' + kind; m.textContent = text; };
+const short = (a) => a.slice(0, 10) + '…' + a.slice(-8);
+
+let account = null;
+
+async function chainIdNow() {
+  return await window.ethereum.request({ method: 'eth_chainId' });
+}
+
+/** Hard gate: returns true only when the wallet is demonstrably on 421614. */
+async function ensureChain() {
+  let cur = await chainIdNow();
+  log('wallet chainId: ' + cur);
+  if (cur === CHAIN_HEX) return true;
+
+  say('Wallet is on ' + cur + ', not Arbitrum Sepolia (421614). Requesting a network switch…', 'warn');
+  try {
+    await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] });
+  } catch (e) {
+    if (e && (e.code === 4902 || e.code === -32603)) {
+      await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [CHAIN_PARAMS] });
+    } else {
+      log('switch rejected: ' + (e && e.message));
+    }
+  }
+  cur = await chainIdNow();
+  log('wallet chainId after switch attempt: ' + cur);
+  return cur === CHAIN_HEX;
+}
+
+async function connect() {
+  if (!window.ethereum) {
+    say('No wallet found. Open this page inside your wallet\u2019s in-app browser (MetaMask on iPhone).', 'bad');
+    return;
+  }
+  $('connect').disabled = true;
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    account = accounts[0];
+    log('account: ' + account);
+
+    const ok = await ensureChain();
+    if (!ok) {
+      say('Still not on Arbitrum Sepolia. Switch the network in your wallet, then tap Connect again. Nothing has been sent.', 'bad');
+      $('connect').disabled = false;
+      return;
+    }
+    say('Connected on Arbitrum Sepolia. Tap Deploy when ready. You will be asked to sign one transaction worth 0 ETH.', 'ok');
+    $('deploy').disabled = false;
+  } catch (e) {
+    say('Connection failed: ' + (e && e.message ? e.message : e), 'bad');
+    $('connect').disabled = false;
+  }
+}
+
+async function deploy() {
+  $('deploy').disabled = true;
+  try {
+    // Re-verify AT THE MOMENT OF SENDING. This is the check that stops a mainnet deploy.
+    const ok = await ensureChain();
+    if (!ok) {
+      say('Refused: wallet is not on Arbitrum Sepolia (421614). Nothing was sent.', 'bad');
+      $('deploy').disabled = false;
+      return;
+    }
+
+    say('Waiting for you to approve in your wallet… Check it shows Arbitrum Sepolia and 0 ETH.', 'info');
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: account, value: '0x0', data: DEPLOY_DATA }]
+    });
+    log('tx: ' + txHash);
+    say('Transaction sent. Waiting for it to be mined…\n' + txHash, 'info');
+
+    let receipt = null;
+    for (let i = 0; i < 60 && !receipt; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      receipt = await window.ethereum.request({ method: 'eth_getTransactionReceipt', params: [txHash] });
+    }
+    if (!receipt) { say('Still pending. Check the explorer for ' + txHash, 'warn'); return; }
+    if (receipt.status !== '0x1') { say('Transaction failed on-chain. Nothing was deployed.', 'bad'); log(JSON.stringify(receipt).slice(0, 400)); return; }
+
+    const addr = receipt.contractAddress;
+    log('deployed at: ' + addr);
+
+    // Self-check: call usdg() and confirm it returns the expected token.
+    const res = await window.ethereum.request({
+      method: 'eth_call',
+      params: [{ to: addr, data: '0xf5b91b7b' }, 'latest']
+    });
+    const got = '0x' + res.slice(-40);
+
+    if (got.toLowerCase() === USDG.toLowerCase()) {
+      say('Deployed and verified.\n\nPayrollRun: ' + addr + '\n\nusdg() returned the correct token, so this is the right contract on the right chain. Send this address back to the agent.', 'ok');
+    } else {
+      say('Deployed at ' + addr + ' but usdg() returned ' + got + ' instead of ' + USDG + '. Do not use it \u2014 report this.', 'bad');
+    }
+  } catch (e) {
+    const m = e && e.message ? e.message : String(e);
+    say(m.includes('User rejected') || m.includes('denied')
+      ? 'Rejected in wallet. Nothing was sent.'
+      : 'Error: ' + m, 'bad');
+    $('deploy').disabled = false;
+  }
+}
+
+$('connect').addEventListener('click', connect);
+$('deploy').addEventListener('click', deploy);
+if (window.ethereum) {
+  window.ethereum.on && window.ethereum.on('chainChanged', (c) => log('chainChanged: ' + c));
+}
+</script>
+</body>
+</html>
