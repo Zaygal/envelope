@@ -96,6 +96,23 @@ function errText(err) {
   return [...new Set(parts)].join(' — ') || 'Unknown error';
 }
 
+// On Arbitrum eth_gasPrice tracks the base fee almost exactly, so a fee discovered a moment
+// before inclusion can land under the base fee of the block that includes the transaction.
+// That is reported by the node as "max fee per gas less than block base fee" and the
+// transaction is rejected outright. Headroom removes the race, and on an L2 it is never
+// charged: you pay baseFee + priority, not maxFeePerGas.
+async function feeOverrides() {
+  try {
+    const fd = await S.signer.provider.getFeeData();
+    const tip = fd.maxPriorityFeePerGas ?? 0n;
+    const max = fd.maxFeePerGas ?? fd.gasPrice ?? null;
+    if (max === null) return {};
+    return { maxFeePerGas: max * 4n, maxPriorityFeePerGas: tip };
+  } catch {
+    return {};   // fall back to whatever the wallet proposes
+  }
+}
+
 const short = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : '—');
 const usdg = (units) => Number(formatUnits(units, USDG_DECIMALS)).toLocaleString(undefined, {
   minimumFractionDigits: 0,
@@ -420,7 +437,7 @@ async function approve() {
   try {
     $('approveBtn').disabled = true;
     $('fundStatus').textContent = 'Confirm the approval in your wallet…';
-    const tx = await token.approve(addr, S.built.total);
+    const tx = await token.approve(addr, S.built.total, await feeOverrides());
     $('fundStatus').textContent = `Approval sent: ${tx.hash}`;
     await tx.wait();
     // Exactly one dominant action at a time: approving hands the weight to the next step.
@@ -445,7 +462,7 @@ async function createRun() {
   try {
     $('createBtn').disabled = true;
     $('fundStatus').textContent = 'Confirm in your wallet…';
-    const tx = await c.createRun(S.built.root, S.built.deadline, S.built.total);
+    const tx = await c.createRun(S.built.root, S.built.deadline, S.built.total, await feeOverrides());
     $('fundStatus').textContent = `Sent: ${tx.hash}`;
     await tx.wait();
 
@@ -528,7 +545,7 @@ async function doClaim() {
   try {
     $('claimBtn').disabled = true;
     $('claimStatus').textContent = 'Confirm in your wallet…';
-    const tx = await c.claim(p.runId, p.index, p.amount, p.salt, p.proof);
+    const tx = await c.claim(p.runId, p.index, p.amount, p.salt, p.proof, await feeOverrides());
     $('claimStatus').textContent = `Sent: ${tx.hash}`;
     await tx.wait();
 
