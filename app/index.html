@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Envelope — verifiable payroll totals, private roster</title>
+<meta name="description" content="An employer funds a payroll in public. Anyone can verify how much was set aside and how much was paid out. Individual salaries stay hidden." />
+<link rel="stylesheet" href="./styles.css" />
+
+<!-- Lets app/lib/merkle.js use the bare specifier 'ethers' in the browser, exactly as it does
+     under Node in the test suite. One module, two runtimes, no bundler. -->
+<script type="importmap">
+{
+  "imports": {
+    "ethers": "https://esm.sh/ethers@6.17.0"
+  }
+}
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h15A1.5 1.5 0 0 1 21 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z"/>
+      <path d="m3.6 6.2 7.5 6.2a1.5 1.5 0 0 0 1.8 0l7.5-6.2"/>
+    </svg>
+    <div>
+      <h1>Envelope</h1>
+      <p class="tagline">Verifiable payroll totals, private roster</p>
+    </div>
+  </div>
+
+  <div class="wallet">
+    <span id="netBadge" class="badge badge-muted">not connected</span>
+    <button id="connectBtn" class="btn btn-ghost">Connect wallet</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab is-active" role="tab" data-view="public"  aria-selected="true">Public proof</button>
+  <button class="tab" role="tab" data-view="employer" aria-selected="false">Employer</button>
+  <button class="tab" role="tab" data-view="claim"    aria-selected="false">Employee</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════ PUBLIC PROOF ══════════════════════════ -->
+<section id="view-public" class="view is-active">
+  <div class="lede">
+    <h2>What anyone can see</h2>
+    <p>
+      Every run below publishes <strong>how much the employer set aside</strong> and
+      <strong>how much has actually been paid out</strong>. Individual salaries are committed,
+      not published — they exist only as salted hashes on-chain, so the roster cannot be
+      enumerated by an outside observer.
+    </p>
+    <p class="fine">
+      No wallet needed to read this page.
+    </p>
+  </div>
+
+  <div class="row-between">
+    <label for="runInput" class="field-label">Run</label>
+    <div class="inline">
+      <input id="runInput" class="input input-sm" type="number" min="1" step="1" placeholder="1" />
+      <button id="loadRunBtn" class="btn btn-sm">Load</button>
+      <button id="refreshRunsBtn" class="btn btn-sm btn-ghost">Refresh</button>
+    </div>
+  </div>
+
+  <div id="publicEmpty" class="empty">
+    No run loaded yet. Enter a run number above, or connect a wallet to list your runs.
+  </div>
+
+  <div id="publicCard" class="hidden">
+    <div class="card card-totals">
+      <div class="totals-head">
+        <div>
+          <span class="kicker">Payroll run</span>
+          <div class="run-id">#<span id="pRunId">—</span></div>
+        </div>
+        <span id="pReclaimed" class="pill hidden">closed</span>
+      </div>
+
+      <div class="totals">
+        <div class="total">
+          <span class="kicker">Set aside</span>
+          <div class="amount"><span id="pDeposited">—</span><span class="unit">USDG</span></div>
+        </div>
+        <div class="total total-accent">
+          <span class="kicker">Paid out</span>
+          <div class="amount"><span id="pClaimed">—</span><span class="unit">USDG</span></div>
+        </div>
+        <div class="total">
+          <span class="kicker">Still held</span>
+          <div class="amount"><span id="pRemaining">—</span><span class="unit">USDG</span></div>
+        </div>
+      </div>
+
+      <div class="progress" role="img" aria-label="share of the payroll claimed">
+        <div id="pBar" class="progress-bar" style="width:0%"></div>
+      </div>
+      <p class="fine" id="pProgressNote">—</p>
+    </div>
+
+    <dl class="facts">
+      <div><dt>Employer</dt><dd class="mono" id="pEmployer">—</dd></div>
+      <div><dt>Merkle root</dt><dd class="mono wrap" id="pRoot">—</dd></div>
+      <div><dt>Claim deadline</dt><dd id="pDeadline">—</dd></div>
+    </dl>
+
+    <div class="notice notice-info">
+      <strong>Individual amounts are not published.</strong>
+      Only the totals above are. When someone claims, that one recipient and amount become
+      visible — the rest stay hidden.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ EMPLOYER ══════════════════════════ -->
+<section id="view-employer" class="view">
+  <div class="lede">
+    <h2>Build a payroll</h2>
+    <p>
+      Add your recipients and amounts. Everything below is computed <strong>in your browser</strong> —
+      salts, leaves and the Merkle root never touch a server. Only the root and the total go on-chain.
+    </p>
+  </div>
+
+  <div id="employerConnect" class="notice notice-warn">
+    Connect a wallet on Arbitrum Sepolia to build and fund a run.
+  </div>
+
+  <div id="employerBody" class="hidden">
+    <div class="card">
+      <div class="row-between">
+        <span class="field-label">Recipients</span>
+        <button id="addRowBtn" class="btn btn-sm btn-ghost">+ Add row</button>
+      </div>
+      <div id="rows" class="rows"></div>
+
+      <div class="sumline">
+        <span>Total</span>
+        <strong><span id="empTotal">0</span> USDG</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="field-label">Commitments</span>
+      <div id="commitBox" class="commit-empty">
+        Build the tree to generate a root. Nothing is sent anywhere yet.
+      </div>
+      <button id="buildBtn" class="btn btn-primary btn-block">Build commitments</button>
+    </div>
+
+    <div id="fundBox" class="hidden">
+      <dl class="facts">
+        <div><dt>Merkle root</dt><dd class="mono wrap" id="empRoot">—</dd></div>
+        <div><dt>Recipients</dt><dd id="empCount">—</dd></div>
+        <div><dt>Total to deposit</dt><dd><strong id="empDeposit">—</strong> USDG</dd></div>
+      </dl>
+
+      <div class="notice notice-warn">
+        <strong>Download your salt file before funding.</strong>
+        Nobody can claim without the salts. If you lose them, employees cannot build a proof and the
+        money can only come back to you after the deadline.
+      </div>
+
+      <div class="inline inline-wrap">
+        <button id="downloadBtn" class="btn">Download claim packages</button>
+        <label class="deadline-field">
+          <span class="field-label">Claim deadline</span>
+          <input id="deadlineInput" class="input" type="date" />
+        </label>
+      </div>
+
+      <div class="two-step">
+        <button id="approveBtn" class="btn btn-primary">1 · Approve USDG</button>
+        <button id="createBtn" class="btn btn-primary" disabled>2 · Create run</button>
+      </div>
+      <p class="fine" id="fundStatus">
+        Step 1 lets the contract move your USDG. Step 2 locks it into the run and publishes the root.
+      </p>
+    </div>
+  </div>
+
+  <div id="myRuns" class="hidden">
+    <h3 class="sub">Your runs</h3>
+    <div id="myRunsList" class="runs"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ EMPLOYEE ══════════════════════════ -->
+<section id="view-claim" class="view">
+  <div class="lede">
+    <h2>Claim your salary</h2>
+    <p>
+      Paste the claim package your employer gave you. It is checked in your browser first — and the
+      beneficiary is bound into the commitment, so the funds can only ever go to the address it was
+      made out to.
+    </p>
+  </div>
+
+  <div class="card">
+    <label class="field-label" for="pkgInput">Claim package</label>
+    <textarea id="pkgInput" class="input mono" rows="7"
+      placeholder='{"envelope":"claim-package.v1","contract":"0x…","runId":"1","index":0,"amount":"900000000","salt":"0x…","proof":["0x…"],"recipient":"0x…"}'></textarea>
+    <div class="inline">
+      <button id="verifyPkgBtn" class="btn btn-primary">Check this package</button>
+      <button id="clearPkgBtn" class="btn btn-ghost">Clear</button>
+    </div>
+  </div>
+
+  <div id="claimResult" class="hidden">
+    <div class="card card-entitlement">
+      <span class="kicker">You are entitled to</span>
+      <div class="entitlement"><span id="cAmount">—</span><span class="unit">USDG</span></div>
+      <p class="fine" id="cMeta">—</p>
+
+      <div id="cBadge" class="notice notice-info">—</div>
+
+      <button id="claimBtn" class="btn btn-primary btn-block" disabled>Claim</button>
+      <p class="fine" id="claimStatus"></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>
+    Envelope settles in <strong>USDG</strong> on <strong>Arbitrum Sepolia</strong> (chain 421614).
+    Testnet assets — no real money is involved.
+  </p>
+  <details class="limits">
+    <summary>What this does <em>not</em> prove — read this before trusting a total</summary>
+    <ul>
+      <li>
+        <strong>The contract cannot prove the committed salaries add up to the funded total.</strong>
+        An employer can under-fund. A recipient holding a perfectly valid proof can then have their
+        claim revert. Preventing that needs a sum proof (Pedersen commitments / ZK), which is out of
+        scope here.
+      </li>
+      <li>
+        <strong>It cannot be hidden, though.</strong> The money is in the contract and publicly
+        visible, and an unpaid recipient can demonstrate a valid proof that fails — public,
+        verifiable evidence of non-payment.
+      </li>
+      <li>
+        <strong>Amounts are revealed when claimed.</strong> The contract must receive the amount to
+        transfer it, so a claim puts that one recipient and amount on-chain.
+      </li>
+      <li>
+        <strong>The aggregate is only checkable by collusion.</strong> Employees could compare their
+        own salaries among themselves — which destroys the privacy the product exists to provide.
+      </li>
+      <li>
+        <strong>Small payrolls leak by deduction.</strong> Know the total plus every salary but one,
+        and the last is determined. The employer always knows everything.
+      </li>
+    </ul>
+  </details>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
